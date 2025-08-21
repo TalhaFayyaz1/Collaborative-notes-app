@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function NewNotePage() {
   const [title, setTitle] = useState("");
@@ -13,39 +10,47 @@ export default function NewNotePage() {
   const router = useRouter();
 
   const handleSave = () => {
-    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    const newNote = { id: Date.now(), title, content };
-    storedNotes.push(newNote);
-    localStorage.setItem("notes", JSON.stringify(storedNotes));
-    router.push("/notes");
+    const newNote = {
+      id: Date.now().toString(),
+      title,
+      content,
+    };
+
+    const existingNotes = JSON.parse(localStorage.getItem("notes") || "[]");
+    localStorage.setItem("notes", JSON.stringify([...existingNotes, newNote]));
+
+    router.push("/notes"); // ✅ Go back to notes list after saving
+  };
+
+  const handleCancel = () => {
+    router.push("/notes"); // ✅ Just go back without saving
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-      <div className="w-[400px] space-y-4 bg-white p-6 rounded shadow">
-        <h1 className="text-xl font-bold">New Note</h1>
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">New Note</h1>
 
-        <div className="space-y-2">
-          <Label>Title</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full border rounded p-2 mb-4"
+      />
 
-        <div className="space-y-2">
-          <Label>Content</Label>
-          <Textarea
-            rows={6}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-        </div>
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full border rounded p-2 mb-4 h-40"
+      />
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => router.push("/notes")}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save</Button>
-        </div>
+      <div className="flex gap-4">
+        <Button onClick={handleSave}>Save</Button>
+        <Button variant="secondary" onClick={handleCancel}>
+          Cancel
+        </Button>
       </div>
-    </main>
+    </div>
   );
 }

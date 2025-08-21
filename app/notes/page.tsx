@@ -1,57 +1,57 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
-type Note = {
-  id: number;
+interface Note {
+  id: string;
   title: string;
   content: string;
-};
+}
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
-    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    setNotes(storedNotes);
+    const savedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
+    setNotes(savedNotes);
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <div className="max-w-3xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Notes</h1>
-        <div className="space-x-2">
-          <Button variant="secondary" onClick={() => router.push("/")}>
-            Back to Home
-          </Button>
-          <Button onClick={() => router.push("/notes/new")}>+ New Note</Button>
+        <div className="flex gap-2">
+          <Link href="/">
+            <Button variant="outline">Home</Button>
+          </Link>
+          <Link href="/notes/new">
+            <Button>New Note</Button>
+          </Link>
         </div>
       </div>
 
       {notes.length === 0 ? (
-        <p className="text-gray-500">No notes yet. Create one!</p>
+        <p className="text-gray-600">No notes yet. Create one!</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <ul className="space-y-4">
           {notes.map((note) => (
-            <Card
+            <li
               key={note.id}
-              className="cursor-pointer hover:shadow-md transition"
-              onClick={() => router.push(`/notes/${note.id}`)}
+              className="p-4 bg-white shadow rounded flex justify-between items-center"
             >
-              <CardContent className="p-4">
-                <h2 className="font-semibold">{note.title}</h2>
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {note.content}
-                </p>
-              </CardContent>
-            </Card>
+              <div>
+                <h2 className="text-lg font-semibold">{note.title}</h2>
+                <p className="text-gray-600 text-sm truncate">{note.content}</p>
+              </div>
+              <Link href={`/notes/${note.id}`}>
+                <Button variant="secondary">Edit</Button>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-    </main>
+    </div>
   );
 }
