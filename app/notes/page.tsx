@@ -4,6 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Note, getNotes, saveNotes, togglePin, deleteNote } from "@/lib/notes";
 
 type SortKey = "updatedAt" | "createdAt" | "title";
@@ -29,11 +42,29 @@ export default function NotesPage() {
     refreshFromStorage();
   };
 
+  const { toast } = useToast();
+
+
   const handleDelete = (id: string) => {
-    if (window.confirm("Delete this note? This cannot be undone.")) {
-      deleteNote(id);
-      refreshFromStorage();
-    }
+    deleteNote(id);
+    refreshFromStorage();
+    toast({
+  title: "Note deleted",
+  description: "Your note has been permanently removed.",
+  variant: "destructive",
+});
+
+  };
+
+  const handleClearAll = () => {
+    saveNotes([]);
+    setNotes([]);
+    toast({
+  title: "All notes cleared",
+  description: "Every note has been deleted.",
+  variant: "destructive",
+});
+
   };
 
   const filteredAndSorted = useMemo(() => {
@@ -119,17 +150,27 @@ export default function NotesPage() {
               View: {view === "list" ? "📋 List" : "🔲 Grid"}
             </Button>
 
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (window.confirm("Clear ALL notes?")) {
-                  saveNotes([]);
-                  setNotes([]);
-                }
-              }}
-            >
-              🗑️ Clear All
-            </Button>
+            {/* Clear All with Modal */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">🗑️ Clear All</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear all notes?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all notes. This action cannot
+                    be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearAll}>
+                    Yes, Clear All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
@@ -197,12 +238,31 @@ export default function NotesPage() {
                     >
                       {note.pinned ? "Unpin" : "Pin"}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDelete(note.id)}
-                    >
-                      Delete
-                    </Button>
+
+                    {/* Delete Single Note with Modal */}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive">Delete</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete note?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete{" "}
+                            <strong>{note.title || "Untitled"}</strong>. This
+                            action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(note.id)}
+                          >
+                            Yes, Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </li>
@@ -265,13 +325,33 @@ export default function NotesPage() {
                       ✏️ Edit
                     </Button>
                   </Link>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(note.id)}
-                  >
-                    🗑️ Delete
-                  </Button>
+
+                  {/* Delete in Grid View with Modal */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="destructive">
+                        🗑️ Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete note?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete{" "}
+                          <strong>{note.title || "Untitled"}</strong>. This
+                          action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(note.id)}
+                        >
+                          Yes, Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}
