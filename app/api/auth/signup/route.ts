@@ -11,27 +11,27 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password required" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    // ✅ Check if user already exists
+    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email already in use" },
+        { error: "User already exists" },
         { status: 400 }
       );
     }
 
-    // ✅ Hash password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Save user in DB
+    // Save user in DB
     const user = await prisma.user.create({
       data: {
         email,
@@ -39,11 +39,15 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({
-      message: "User created successfully",
-      user: { id: user.id, email: user.email },
-    });
+    return NextResponse.json(
+      { message: "User created successfully", user: { id: user.id, email: user.email } },
+      { status: 201 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Signup error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
