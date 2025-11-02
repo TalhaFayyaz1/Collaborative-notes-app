@@ -2,15 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setMessage("");
 
     try {
@@ -23,53 +27,80 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("Signup successful! Redirecting...");
-        setTimeout(() => router.push("/login"), 1500);
+        setMessage("✅ Account created! Redirecting...");
+        setTimeout(() => router.push("/login"), 1200);
       } else {
-        setMessage(data.error || "Something went wrong");
+        setMessage(data.error || "Signup failed");
       }
-    } catch (error) {
-      setMessage("Error signing up. Try again.");
+    } catch {
+      setMessage("Something went wrong.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f3ff] via-[#faf9ff] to-[#ffffff]">
       <form
         onSubmit={handleSignup}
-        className="bg-white shadow-md rounded-xl p-8 w-full max-w-md"
+        className="bg-white/70 backdrop-blur-xl shadow-lg rounded-2xl p-8 w-full max-w-md border border-gray-100"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+          ✨ Create an Account
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Start your journey with{" "}
+          <span className="font-semibold text-indigo-600">Simple Notes</span>
+        </p>
 
+        {/* Email */}
         <input
           type="email"
-          placeholder="Email"
-          className="w-full mb-4 p-2 border rounded-lg"
+          placeholder="Email address"
+          className="w-full mb-4 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-4 p-2 border rounded-lg"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {/* Password with Show/Hide */}
+        <div className="relative mb-6">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium transition disabled:opacity-50"
         >
-          Sign Up
+          {loading ? "Creating..." : "Sign Up"}
         </button>
 
-        {message && <p className="mt-4 text-center text-gray-700">{message}</p>}
+        {message && (
+          <p className="mt-4 text-center text-gray-600 font-medium">{message}</p>
+        )}
 
-        <p className="mt-4 text-center">
+        <p className="mt-6 text-center text-gray-500">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Log In
+          <a
+            href="/login"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
+            Log in
           </a>
         </p>
       </form>
