@@ -12,11 +12,13 @@
 		"dotenv": "^16.4.0",
 		"express": "^4.19.0",
 		"google-auth-library": "^9.0.0",
-		"jsonwebtoken": "^9.0.2",
-		"@prisma/client": "latest"
+		"jsonwebtoken": "^9.0.2"
 	},
 	"devDependencies": {
+		"@prisma/client": "^7.0.1",
 		"nodemon": "^3.1.0",
-		"prisma": "latest"
+		"prisma": "^7.0.1",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3"
 	}
 }
