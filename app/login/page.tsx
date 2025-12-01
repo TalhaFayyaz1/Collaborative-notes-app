@@ -3,25 +3,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [googleToken, setGoogleToken] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
+    setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, googleToken }),
       });
 
       const data = await res.json();
@@ -31,13 +34,13 @@ export default function LoginPage() {
         setMessage("✅ Logged in! Redirecting...");
         setTimeout(() => router.push("/notes"), 1200);
       } else {
-        setMessage(data.error || "Invalid credentials");
+        setMessage(data.message || "Login failed");
       }
     } catch {
       setMessage("Something went wrong.");
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -49,61 +52,59 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
           ✨ Welcome Back
         </h1>
-        <p className="text-center text-gray-500 mb-6">
-          Log in to continue to{" "}
-          <span className="font-semibold text-indigo-600">Simple Notes</span>
-        </p>
 
-        {/* Email */}
         <input
           type="email"
           placeholder="Email address"
-          className="w-full mb-4 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full mb-4 p-3 border border-gray-200 rounded-xl"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        {/* Password with Show/Hide */}
         <div className="relative mb-6">
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
-            className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 pr-10"
+            className="w-full p-3 border border-gray-200 rounded-xl pr-10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+            className="absolute inset-y-0 right-3 text-gray-500"
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
 
+        {/* Google Login */}
+        <div className="flex justify-center mb-4">
+          <GoogleLogin
+            onSuccess={(cred) => {
+              setGoogleToken(cred.credential || "");
+              setMessage("Google verification complete ✔");
+            }}
+            onError={() => setMessage("Google verification failed")}
+          />
+        </div>
+
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium transition disabled:opacity-50"
+          disabled={loading || !googleToken}
+          className="w-full bg-indigo-600 text-white py-3 rounded-xl disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Log In"}
         </button>
 
         {message && (
-          <p className="mt-4 text-center text-gray-600 font-medium">{message}</p>
+          <p className="mt-4 text-center text-gray-600 font-medium">
+            {message}
+          </p>
         )}
-
-        <p className="mt-6 text-center text-gray-500">
-          Don’t have an account?{" "}
-          <a
-            href="/signup"
-            className="text-indigo-600 font-semibold hover:underline"
-          >
-            Sign up
-          </a>
-        </p>
       </form>
     </div>
   );
