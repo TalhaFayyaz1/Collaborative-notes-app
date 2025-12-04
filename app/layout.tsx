@@ -64,10 +64,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Google OAuth Provider must wrap entire app */}
-        <GoogleOAuthProvider clientId="dummy-google-id">
-          {children}
-        </GoogleOAuthProvider>
-
+<GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+  {children}
+</GoogleOAuthProvider>
         <Toaster />
       </body>
     </html>
