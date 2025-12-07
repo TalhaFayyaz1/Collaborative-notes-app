@@ -163,7 +163,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <div className="max-w-6xl mx-auto p-12 text-center">
         <h1 className="text-5xl font-extrabold">✨ Simple Notes</h1>
-        <p className="mt-3 text-gray-600">Capture your thoughts — you're signed in as <strong>{userEmail}</strong></p>
+        <p className="mt-3 text-gray-600">Capture your thoughts — you&apos;re signed in as <strong>{userEmail}</strong></p>
         <div className="mt-8 flex justify-center gap-4">
           <Link href="/notes">
             <button className="px-6 py-3 rounded-lg bg-black text-white">🚀 Go to Notes</button>

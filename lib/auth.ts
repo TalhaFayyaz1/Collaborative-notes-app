@@ -33,6 +33,7 @@ export function verifyToken(req: Request) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
     return decoded as { id: number; email: string };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     throw new Error("Unauthorized: Invalid token");
   }

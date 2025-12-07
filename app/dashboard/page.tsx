@@ -3,9 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Define User type
+interface User {
+  email: string;
+  [key: string]: unknown; // optional: for other properties
+}
+
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,7 +62,9 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-2xl font-bold mb-3">Welcome to your Dashboard!</h1>
-      <p className="mb-4">Logged in as: <strong>{user.email}</strong></p>
+      <p className="mb-4">
+        Logged in as: <strong>{user?.email}</strong>
+      </p>
       <button
         className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
         onClick={() => {

@@ -1,8 +1,18 @@
-// components/ui/use-toast.ts
 "use client";
 
 import * as React from "react";
-import { ToastActionElement, type ToastProps } from "@/components/ui/toast";
+
+// Define ToastProps locally since import was failing
+export interface ToastProps {
+  id?: string;
+  title?: string;
+  description?: string;
+  open?: boolean;
+  action?: React.ReactNode;
+  variant?: "default" | "success" | "error" | "warning";
+  onOpenChange?: (open: boolean) => void;
+  [key: string]: unknown;
+}
 
 type Toast = Omit<ToastProps, "id">;
 
@@ -34,6 +44,12 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout);
 };
 
+type Action =
+  | { type: "ADD_TOAST"; toast: ToastProps }
+  | { type: "UPDATE_TOAST"; toast: Partial<ToastProps> & { id: string } }
+  | { type: "DISMISS_TOAST"; toastId?: string }
+  | { type: "REMOVE_TOAST"; toastId?: string };
+
 const toastReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -52,7 +68,7 @@ const toastReducer = (state: State, action: Action): State => {
 
     case "DISMISS_TOAST": {
       const { toastId } = action;
-      addToRemoveQueue(toastId);
+      if (toastId) addToRemoveQueue(toastId);
 
       return {
         ...state,
@@ -70,17 +86,14 @@ const toastReducer = (state: State, action: Action): State => {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
       };
+
+    default:
+      return state;
   }
 };
 
 const listeners: Array<(state: State) => void> = [];
 let memoryState: State = { toasts: [] };
-
-type Action =
-  | { type: "ADD_TOAST"; toast: ToastProps }
-  | { type: "UPDATE_TOAST"; toast: Partial<ToastProps> & { id: string } }
-  | { type: "DISMISS_TOAST"; toastId?: string }
-  | { type: "REMOVE_TOAST"; toastId?: string };
 
 function dispatch(action: Action) {
   memoryState = toastReducer(memoryState, action);
